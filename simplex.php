@@ -18,6 +18,8 @@
   $nvd=0;
   $ncont=0;
   
+  echo "Método Simplex";
+  echo "<br/><br/>Expressão--> ".$expressao;
   
   for($i=0;$i<strlen($expressao);$i++)//Extrair variáveis de decisão.
   {
@@ -53,16 +55,19 @@
        
   }
   
-  echo "VD: {$variadec[0][0]} - {$variadec[0][1]} - {$variadec[1][0]} - {$variadec[1][1]} -<br/>";
-  $ncont=0;
+  echo "<br/>Variáveis de decisão--> ";
+  for($i=0;$i<$nvd;$i++)
+    echo "{$variadec[$i][0]}{$variadec[$i][1]} | ";
 
   for($i=0;$i<$nres;$i++)//Zerando matriz restricoes_p
      for($j=0;$j<$nvd+1;$j++)
         $restricoes_p[$i][$j] = 0;
-        
+   
+  echo "<br/>";  
+  $ncont=0;  
   for($m=0;$m<$nres;$m++)//Extrair restrições.
   {
-   echo "<br/> $restricoes[$m]";
+   echo "<br/> Restrição $m --> $restricoes[$m]";
    for($i=0;$i<strlen($restricoes[$m]);$i++)
    {
     if(is_numeric($restricoes[$m][$i])==true)//É Número.
@@ -81,8 +86,7 @@
 	   }
 	}
     else//Não é número.É variável ou sinal.
-	{
-	   
+	{   
 	   if($c==1)//Tinha começado um número.
 	   {
 	         for($u=0;$u<$nvd;$u++)
@@ -111,13 +115,12 @@
 	}
    }}
    
-  // echo "<br/>{$restricoes_p[0][0]}  {$restricoes_p[0][1]}";
-  
+  echo "<br/><br/> Matriz dos valores das restrições";
   for($i=0;$i<$nres;$i++)
   {
     echo"<br/>";
     for($p=0;$p<=$nvd;$p++)
-      echo "{$restricoes_p[$i][$p]}  ";
+      print str_pad("{$restricoes_p[$i][$p]}", 10,".", STR_PAD_RIGHT) ;
   }
   
   echo"<br/>";
@@ -144,16 +147,21 @@
    
    $tableau[$j][1+$nvd+$nres] = $restricoes_p[$j-1][$nvd];
   }
-   
   
-  echo "Expressão: ".$expressao;
-  
+  echo "<br/><br/>Matriz Inicial Computada!";
   for($i=0;$i<$nres+1;$i++)
   {
     echo"<br/>";
     for($p=0;$p<$nvd+$nres+2;$p++)
-      print str_pad("{$tableau[$i][$p]}", 10,".", STR_PAD_RIGHT) ;
+    {
+      if(is_float($tableau[$i][$p])==true)
+         $print = number_format($tableau[$i][$p],1);
+      else
+         $print = $tableau[$i][$p];
+      print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
+    }
   }
+  
   $parada = 1;
   while($parada==1)//
   {
@@ -166,7 +174,7 @@
           $menorc[0] = $tableau[0][$i+1];
           $menorc[1] = $i+1;
        }
-     echo "<br/>Menor coeficiente:$menorc[0]___$menorc[1]";
+     echo "<br/>Menor coeficiente --> $menorc[0]"."[".$menorc[1]."]";
        
      //Quem sai?
      $noelpo=0;
@@ -199,22 +207,18 @@
        if($quociente[$i] < $menorq[0] && $quociente[$i]>=0)
        {
           $menorq[0] = $quociente[$i];
-          $menorq[1] = $i;
+          $menorq[1] = $i;//Variável que vai sair.
        }
-     $varsai = $menorq[1];//Variável que vai sair.
-     echo "<br/>Menor quociente-->$menorq[0]___$menorq[1]";
+     echo "<br/>Menor quociente --> $menorq[0]"."[".$menorq[1]."]";
      
      $pivo = $tableau[$menorq[1]+1][$menorc[1]];
-     for($k=1;$k<=($nvd+$nres+1);$k++)//Dividindo linha($varsai) pelo pivô.
+     for($k=1;$k<=($nvd+$nres+1);$k++)//Dividindo linha($menorq[1]) pelo pivô.
        $tableau[$menorq[1]+1][$k] = ($tableau[$menorq[1]+1][$k])/$pivo;
-     for($k=1;$k<=($nvd+$nres+1);$k++)
-       echo  "{$tableau[$menorq[1]+1][$k]}|";
        
-     for($k=0;$k<$nres+1;$k++)/*Tornar a coluna [$menorc] em um vetor identidade com o elemento x na coluna($varsai).*/
+     for($k=0;$k<$nres+1;$k++)/*Tornar a coluna [$menorc] em um vetor identidade com o elemento x na coluna($menorq[1]).*/
        if($tableau[$k][$menorc[1]]!=0 && $k!=$menorq[1]+1)//Deixar nulo todos os elementos da coluna.
        {
          $point = $tableau[$k][$menorc[1]]*-1;
-         echo "<br/> 3Linha:__{$tableau[$k][$r+1]}....2Linha:__{$tableau[$menorq[1]+1][$r+1]}.....P:__$point";
          for($r=0;$r<($nvd+$nres+2);$r++)
            $tableau[$k][$r+1] = ($tableau[$menorq[1]+1][$r+1]*$point)+$tableau[$k][$r+1];
        }
@@ -224,7 +228,13 @@
       {
         echo"<br/>";
         for($p=0;$p<$nvd+$nres+2;$p++)
-          print str_pad("{$tableau[$i][$p]}", 10,".", STR_PAD_RIGHT) ;
+        {
+         if(is_float($tableau[$i][$p])==true)
+           $print = number_format($tableau[$i][$p],1);
+         else
+           $print = $tableau[$i][$p];
+         print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
+        }
       }
       
       $contp = 0;
@@ -234,5 +244,4 @@
       if($contp==0)
         $parada = 0;
   }
-  
 ?>
