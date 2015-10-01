@@ -21,6 +21,8 @@
   echo "Método Simplex";
   echo "<br/><br/>Expressão--> ".$expressao;
   
+  $neg = 0;
+  $negv = 0;
   for($i=0;$i<strlen($expressao);$i++)//Extrair variáveis de decisão.
   {
     if(is_numeric($expressao[$i])==true)//É Número.
@@ -31,26 +33,46 @@
 	     $c = 1;
 	   }
 	   $ncont++;
+	   if($i>0)
+	   {
+	     if(strcmp($expressao[$i-1],'-')==0)
+	       $neg = 1;
+	     else
+	       $neg = 0;
+	   }
+	   else
+	     $neg = 0;
 	}
      else//Não é número.É variável ou sinal.
 	{	
 	   if($c==1)//Tinha começado um número.
 	   {
-		 $variadec[$j][0] = (float)substr($expressao,(int)$ni,(int)$ncont);
+	        if($neg==1)
+		  $variadec[$j][0] = ((float)substr($expressao,(int)$ni,(int)$ncont))*(-1);
+		else
+		  $variadec[$j][0] = (float)substr($expressao,(int)$ni,(int)$ncont);
 		 $variadec[$j][1] = $expressao[$i];
 		 $c = 0;
 		 $j++;
 		 $nvd++;
 		 $ncont=0;
+		 $neg=0;
 	   }
 	   else
 	     if(strcmp($expressao[$i],'+')!=0 && strcmp($expressao[$i],'-')!=0)//Não é sinal.Provável 1.
 		 {
-		   $variadec[$j][0] = (float)1;
+		   if($negv==1)
+		     $variadec[$j][0] = (float)-1;
+		   else
+		     $variadec[$j][0] = (float)1;
 		   $variadec[$j][1] = $expressao[$i];
 		   $j++;
 		   $nvd++;
+		   $negv = 0;
 		 }
+             else
+                if(strcmp($expressao[$i],'-')==0 && is_numeric($expressao[$i+1])==false)
+                  $negv = 1;
 	}
        
   }
@@ -65,6 +87,8 @@
    
   echo "<br/>";  
   $ncont=0;  
+  $negv = 0;
+  $neg = 0;
   for($m=0;$m<$nres;$m++)//Extrair restrições.
   {
    echo "<br/> Restrição $m --> $restricoes[$m]";
@@ -78,11 +102,24 @@
 	     $c = 1;
 	   }
 	   $ncont++;
+	   if($i>0)
+	   {
+	     if(strcmp($expressao[$i-1],'-')==0)
+	       $neg = 1;
+	     else
+	       $neg = 0;
+	   }
+	   else
+	     $neg = 0;
 	   if($i==strlen($restricoes[$m])-1)
 	   {
-	     $restricoes_p[$m][$nvd] = (float)substr($restricoes[$m],(int)$ni,(int)$ncont);
+	     if($neg==1)
+	       $restricoes_p[$m][$nvd] = ((float)substr($restricoes[$m],(int)$ni,(int)$ncont))*(-1);
+	     else
+	       $restricoes_p[$m][$nvd] = (float)substr($restricoes[$m],(int)$ni,(int)$ncont);
 	     $c = 0;
 	     $ncont=0;
+	     $neg = 0;
 	   }
 	}
     else//Não é número.É variável ou sinal.
@@ -92,9 +129,13 @@
 	         for($u=0;$u<$nvd;$u++)
 		      if(strcmp($variadec[$u][1],$restricoes[$m][$i])==0)
 		         $j=$u;
-		 $restricoes_p[$m][$j] = (float)substr($restricoes[$m],(int)$ni,(int)$ncont);
+		 if($neg==1)
+		   $restricoes_p[$m][$j] = ((float)substr($restricoes[$m],(int)$ni,(int)$ncont))*(-1);
+		 else
+		   $restricoes_p[$m][$j] = (float)substr($restricoes[$m],(int)$ni,(int)$ncont);
 		 $c = 0;
 		 $ncont=0;
+		 $neg = 0;
 	   }
 	   else
 	     if(strcmp($restricoes[$m][$i],'+')!=0 && strcmp($restricoes[$m][$i],'-')!=0)//Não é sinal.Provável 1.
@@ -109,9 +150,16 @@
 		    for($u=0;$u<$nvd;$u++)
 		      if(strcmp($variadec[$u][1],$restricoes[$m][$i])==0)
 		         $j=$u;
-		    $restricoes_p[$m][$j] = (float)1;
+		    if($negv==1)
+		      $restricoes_p[$m][$j] = (float)-1;
+		    else
+		      $restricoes_p[$m][$j] = (float)1;
+		    $negv = 0;
 		   }
 		 }
+             else
+               if(strcmp($restricoes[$m][$i],'-')==0 && is_numeric($restricoes[$m][$i+1])==false)
+                  $negv = 1;
 	}
    }}
    
@@ -155,7 +203,7 @@
     for($p=0;$p<$nvd+$nres+2;$p++)
     {
       if(is_float($tableau[$i][$p])==true)
-         $print = number_format($tableau[$i][$p],1);
+         $print = number_format($tableau[$i][$p],1,',','.');
       else
          $print = $tableau[$i][$p];
       print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
@@ -210,6 +258,7 @@
           $menorq[1] = $i;//Variável que vai sair.
        }
      echo "<br/>Menor quociente --> $menorq[0]"."[".$menorq[1]."]";
+     $tableau[$menorq[1]+1][0] = $menorc[1];
      
      $pivo = $tableau[$menorq[1]+1][$menorc[1]];
      for($k=1;$k<=($nvd+$nres+1);$k++)//Dividindo linha($menorq[1]) pelo pivô.
@@ -230,7 +279,7 @@
         for($p=0;$p<$nvd+$nres+2;$p++)
         {
          if(is_float($tableau[$i][$p])==true)
-           $print = number_format($tableau[$i][$p],1);
+           $print = number_format($tableau[$i][$p],1,',','.');
          else
            $print = $tableau[$i][$p];
          print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
