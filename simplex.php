@@ -1,7 +1,21 @@
 <?php
+//wallaceosmar
+// wallace osmar tavares delmond 471305
+ini_set('display_errors',E_ALL);
+error_reporting(0);
+?>
+<html>
+	<head>
+		<meta charset="utf8">
+	</head>
+	<body>
+<?php
 
   $expressao = $_GET["expression"];
   $nres = $_GET["hnr"];
+  // '' !== $variavel
+  // foreach( Array('restricao01','restricao02',...) as $key => $value) {}
+  //$restricoes = $_GET['restricao'];
   $restricoes[0] = $_GET["restricao01"];
   $restricoes[1] = $_GET["restricao02"];
   $restricoes[2] = $_GET["restricao03"];
@@ -12,15 +26,16 @@
   $restricoes[7] = $_GET["restricao08"];
   $restricoes[8] = $_GET["restricao09"];
   $restricoes[9] = $_GET["restricao10"];
+  // count()
   $ni = -1;
   $c = 0;
   $j=0;
   $nvd=0;
   $ncont=0;
-  
-  echo "Método Simplex";
-  echo "<br/><br/>Expressão--> ".$expressao;
-  
+?>
+Método Simplex;
+<br/><br/>Expressão--> <?php echo $expressao?>
+<?php  
   $neg = 0;
   $negv = 0;
   for($i=0;$i<strlen($expressao);$i++)//Extrair variáveis de decisão.
@@ -216,7 +231,7 @@
      //Achar o menor coeficiente da função objetivo.
      $menorc[0] = $tableau[0][1];
      $menorc[1] = 1;
-     for($i=0;$i<$nvd;$i++)
+     for($i=0;$i<$nvd+$nres+1;$i++)
        if($tableau[0][$i+1] < $menorc[0])
        {
           $menorc[0] = $tableau[0][$i+1];
@@ -287,10 +302,11 @@
       }
       
       $contp = 0;
-      for($i=0;$i<($nvd);$i++)
+      for($i=0;$i<($nvd+$nres+1);$i++)
        if($tableau[0][$i+1]<0)
          $contp++;
       if($contp==0)
         $parada = 0;
   }
+
 ?>
