@@ -1,9 +1,9 @@
-# CSIT
-# Bacharelado em Ciência da Computação
-# Trabalho Pesquisa Operacional
-# Algoritmo Simplex
+Repositório CSIT (Computer Science Information Technology)
 
+Bacharelado em Ciência da Computação
 
-# Joziel Paula Novais RA:533343
-# Bruno Koji Kakuda RA:
-# Rafael RA:
+Pesquisa Operacional
+
+Algoritmo Simplex para resolução de problemas de progressão linear.
+
+Mais Informações: https://github.com/jozielpn/CSIT/wiki
