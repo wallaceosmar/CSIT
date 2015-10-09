@@ -1,48 +1,71 @@
 <html>
   <head>
-    <title>Formulário</title>
+    <meta charset="utf8" />
+    <title>Formulário Simplex</title>
   </head>
   
   <body>
     <form name="Simplex" method="GET" action="simplex.php">
-	  <label> Expressão:</label><br/>
-	  <input type="text" name="expression" size="100" maxlength="100"/><br/>
+	  <p>
+	  <label>--------------------------------- Algoritmo Simplex ---------------------------------</label>
+	  </p>
 	  
-	  <label> Número de restrições:</label><br/>
-	  <input type="number" name="hnr" size="10" maxlength="10"/><br/>
+	  <p>
+	  <label> Selecione o tipo:</label><br/>
+		<select name="opmx">
+			<option value="0">Maximizar</option>
+			<option value="1">Minimizar</option>
+		</select>
+	  </p>
 	  
-	  <label> Restrição 01:</label><br/>
-	  <input type="text" name="restricao01" size="100" maxlength="100"/><br/>
+	  <p>
+		<label> Função Objetivo:</label><br/>
+		<input type="text" name="expression" size="77" maxlength="77"/><br/>
+	  </p>
 	  
-	  <label> Restrição 02:</label><br/>
-	  <input type="text" name="restricao02" size="100" maxlength="100"/><br/>
+	  <p><a href="#" onclick="javascript:addRestricao();">Nova restrição</a></p>
 	  
-	  <label> Restrição 03:</label><br/>
-	  <input type="text" name="restricao03" size="100" maxlength="100"/><br/>
+	  <p>
+		<label> Restrição 1:</label>
+		<input type="text" name="restricao[]" size="62" maxlength="62"/>
+	  <p>
 	  
-	  <label> Restrição 04:</label><br/>
-	  <input type="text" name="restricao04" size="100" maxlength="100"/><br/>
+	  <div id="restricao"></div>
 	  
-	  <label> Restrição 05:</label><br/>
-	  <input type="text" name="restricao05" size="100" maxlength="100"/><br/>
+	  <p>
+		<button name="op" value="1">Resultado Final</button>
+		<button name="op" value="2">Interações</button>
+		<button name="op" value="3">Passo a Passo</button>
+		<input type="reset" onclick="javascript:limpar();" value="Limpar"/>
+	  </p>
 	  
-	  <label> Restrição 06:</label><br/>
-	  <input type="text" name="restricao06" size="100" maxlength="100"/><br/>
-	  
-	  <label> Restrição 07:</label><br/>
-	  <input type="text" name="restricao07" size="100" maxlength="100"/><br/>
-	  
-	  <label> Restrição 08:</label><br/>
-	  <input type="text" name="restricao08" size="100" maxlength="100"/><br/>
-	  
-	  <label> Restrição 09:</label><br/>
-	  <input type="text" name="restricao09" size="100" maxlength="100"/><br/>
-	  
-	  <label> Restrição 10:</label><br/>
-	  <input type="text" name="restricao10" size="100" maxlength="100"/><br/>
-	  
-	  <input type="submit" value="Enviar"/>
-	  <input type="reset" value="Limpar"/>
+		<script>
+		var i = 1;
+		function addRestricao() {
+			var
+				p = document.createElement('p');
+				node = document.createElement('div'),
+				label = document.createElement('label'),
+				input = document.createElement('input')
+			;
+			
+			label.innerHTML = 'Restrição ' + ( ++i ) + ':&nbsp;';
+			input.setAttribute('name','restricao[]');
+			input.setAttribute('size','62');
+			input.setAttribute('maxlength','62');
+			
+			node.appendChild(label);
+			node.appendChild(input);
+			p.appendChild(node);
+			
+			document.getElementById('restricao').appendChild(p);
+		}
+		function limpar() {
+			i = 0;
+			document.getElementById('restricao').innerHTML = '';
+		}
+		
+		</script>
 	  
 	</form>
   </body>
