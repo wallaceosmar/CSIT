@@ -1,41 +1,28 @@
 <?php
-//wallaceosmar
-// wallace osmar tavares delmond 471305
 ini_set('display_errors',E_ALL);
 error_reporting(0);
-?>
-<html>
-	<head>
-		<meta charset="utf8">
-	</head>
-	<body>
-<?php
+header ('Content-type: text/html; charset=UTF-8');
 
   $expressao = $_GET["expression"];
-  $nres = $_GET["hnr"];
-  // '' !== $variavel
-  // foreach( Array('restricao01','restricao02',...) as $key => $value) {}
-  //$restricoes = $_GET['restricao'];
-  $restricoes[0] = $_GET["restricao01"];
-  $restricoes[1] = $_GET["restricao02"];
-  $restricoes[2] = $_GET["restricao03"];
-  $restricoes[3] = $_GET["restricao04"];
-  $restricoes[4] = $_GET["restricao05"];
-  $restricoes[5] = $_GET["restricao06"];
-  $restricoes[6] = $_GET["restricao07"];
-  $restricoes[7] = $_GET["restricao08"];
-  $restricoes[8] = $_GET["restricao09"];
-  $restricoes[9] = $_GET["restricao10"];
-  // count()
+  $op = $_GET["op"];
+  $opmx = $_GET["opmx"];
+  $restricoes = $_GET['restricao'];
+  $nres = 0;
+  for($i=0;$i<10;$i++)
+     if($restricoes[$i]!='')
+	   $nres++;
+  if($opmx==0)
+    $mx = "MAX";
+  else
+    $mx = "MIN";
+
+  echo "--- Método Simplex ---";
+  echo "<br/><br/>Expressão--> $expressao";//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
   $ni = -1;
   $c = 0;
   $j=0;
   $nvd=0;
   $ncont=0;
-?>
-Método Simplex;
-<br/><br/>Expressão--> <?php echo $expressao?>
-<?php  
   $neg = 0;
   $negv = 0;
   for($i=0;$i<strlen($expressao);$i++)//Extrair variáveis de decisão.
@@ -92,7 +79,12 @@ Método Simplex;
        
   }
   
-  echo "<br/>Variáveis de decisão--> ";
+  if($opmx==1)
+  {
+    for($i=0;$i<$nvd;$i++)
+      $variadec[$i][0] = ($variadec[$i][0])*-1;
+  }
+  echo "<br/>Variáveis de decisão--> ";//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
   for($i=0;$i<$nvd;$i++)
     echo "{$variadec[$i][0]}{$variadec[$i][1]} | ";
 
@@ -106,8 +98,8 @@ Método Simplex;
   $neg = 0;
   for($m=0;$m<$nres;$m++)//Extrair restrições.
   {
-   echo "<br/> Restrição $m --> $restricoes[$m]";
-   for($i=0;$i<strlen($restricoes[$m]);$i++)
+   echo "<br/> Restrição $m --> $restricoes[$m]";//|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+   for($i=0,$c=0;$i<strlen($restricoes[$m]);$i++)
    {
     if(is_numeric($restricoes[$m][$i])==true)//É Número.
 	{
@@ -119,7 +111,7 @@ Método Simplex;
 	   $ncont++;
 	   if($i>0)
 	   {
-	     if(strcmp($expressao[$i-1],'-')==0)
+	     if(strcmp($restricoes[$m][$i-1],'-')==0)
 	       $neg = 1;
 	     else
 	       $neg = 0;
@@ -128,8 +120,8 @@ Método Simplex;
 	     $neg = 0;
 	   if($i==strlen($restricoes[$m])-1)
 	   {
-	     if($neg==1)
-	       $restricoes_p[$m][$nvd] = ((float)substr($restricoes[$m],(int)$ni,(int)$ncont))*(-1);
+	     if($neg==1){echo "hihihihihi";
+	       $restricoes_p[$m][$nvd] = ((float)substr($restricoes[$m],(int)$ni,(int)$ncont))*(-1);}
 	     else
 	       $restricoes_p[$m][$nvd] = (float)substr($restricoes[$m],(int)$ni,(int)$ncont);
 	     $c = 0;
@@ -178,7 +170,7 @@ Método Simplex;
 	}
    }}
    
-  echo "<br/><br/> Matriz dos valores das restrições";
+  echo "<br/><br/> Matriz dos valores das restrições";//||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
   for($i=0;$i<$nres;$i++)
   {
     echo"<br/>";
@@ -211,6 +203,7 @@ Método Simplex;
    $tableau[$j][1+$nvd+$nres] = $restricoes_p[$j-1][$nvd];
   }
   
+  if($op>2){////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   echo "<br/><br/>Matriz Inicial Computada!";
   for($i=0;$i<$nres+1;$i++)
   {
@@ -223,11 +216,28 @@ Método Simplex;
          $print = $tableau[$i][$p];
       print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
     }
-  }
+  }}
   
   $parada = 1;
-  while($parada==1)//
+  $it = 0;
+  while($parada==1)
   {
+     $it++;
+	 if($op>1){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     echo "<br/>"."<br/>";
+	 echo "<br/> $it"."º"." Iteração:";
+     for($i=0;$i<$nres+1;$i++)
+      {
+        echo"<br/>";
+        for($p=0;$p<$nvd+$nres+2;$p++)
+        {
+         if(is_float($tableau[$i][$p])==true)
+           $print = number_format($tableau[$i][$p],1,',','.');
+         else
+           $print = $tableau[$i][$p];
+         print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
+        }
+      }}
      //Achar o menor coeficiente da função objetivo.
      $menorc[0] = $tableau[0][1];
      $menorc[1] = 1;
@@ -237,7 +247,8 @@ Método Simplex;
           $menorc[0] = $tableau[0][$i+1];
           $menorc[1] = $i+1;
        }
-     echo "<br/>Menor coeficiente --> $menorc[0]"."[".$menorc[1]."]";
+	 if($op>1){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     echo "<br/>Menor coeficiente --> $menorc[0]"."[".$menorc[1]."]";}
        
      //Quem sai?
      $noelpo=0;
@@ -272,22 +283,16 @@ Método Simplex;
           $menorq[0] = $quociente[$i];
           $menorq[1] = $i;//Variável que vai sair.
        }
-     echo "<br/>Menor quociente --> $menorq[0]"."[".$menorq[1]."]";
+	 if($op>1){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     echo "<br/>Menor quociente --> $menorq[0]"."[".$menorq[1]."]";}
      $tableau[$menorq[1]+1][0] = $menorc[1];
      
      $pivo = $tableau[$menorq[1]+1][$menorc[1]];
      for($k=1;$k<=($nvd+$nres+1);$k++)//Dividindo linha($menorq[1]) pelo pivô.
        $tableau[$menorq[1]+1][$k] = ($tableau[$menorq[1]+1][$k])/$pivo;
-       
-     for($k=0;$k<$nres+1;$k++)/*Tornar a coluna [$menorc] em um vetor identidade com o elemento x na coluna($menorq[1]).*/
-       if($tableau[$k][$menorc[1]]!=0 && $k!=$menorq[1]+1)//Deixar nulo todos os elementos da coluna.
-       {
-         $point = $tableau[$k][$menorc[1]]*-1;
-         for($r=0;$r<($nvd+$nres+2);$r++)
-           $tableau[$k][$r+1] = ($tableau[$menorq[1]+1][$r+1]*$point)+$tableau[$k][$r+1];
-       }
-       
+	 if($op>2){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      echo "<br/>"."<br/>";
+	 echo "<br/> Dividindo a linha do menor quociente pelo pivô: $pivo.";
      for($i=0;$i<$nres+1;$i++)
       {
         echo"<br/>";
@@ -299,8 +304,31 @@ Método Simplex;
            $print = $tableau[$i][$p];
          print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
         }
-      }
+      }}
+       
+     for($k=0;$k<$nres+1;$k++)/*Tornar a coluna [$menorc] em um vetor identidade com o elemento x na coluna($menorq[1]).*/
+       if($tableau[$k][$menorc[1]]!=0 && $k!=$menorq[1]+1)//Deixar nulo todos os elementos da coluna.
+       {
+         $point = $tableau[$k][$menorc[1]]*-1;
+         for($r=0;$r<($nvd+$nres+2);$r++)
+           $tableau[$k][$r+1] = ($tableau[$menorq[1]+1][$r+1]*$point)+$tableau[$k][$r+1];
+       }
       
+	 if($op>2){/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     echo "<br/>"."<br/>";
+	 echo "<br/> Transformando coluna do menor coeficiente em um vetor identidade.";
+     for($i=0;$i<$nres+1;$i++)
+      {
+        echo"<br/>";
+        for($p=0;$p<$nvd+$nres+2;$p++)
+        {
+         if(is_float($tableau[$i][$p])==true)
+           $print = number_format($tableau[$i][$p],1,',','.');
+         else
+           $print = $tableau[$i][$p];
+         print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
+        }
+      }}
       $contp = 0;
       for($i=0;$i<($nvd+$nres+1);$i++)
        if($tableau[0][$i+1]<0)
@@ -308,5 +336,50 @@ Método Simplex;
       if($contp==0)
         $parada = 0;
   }
-
+  
+  if($opmx==1)
+   $tableau[0][$nvd+$nres+1] = ($tableau[0][$nvd+$nres+1])*-1;
+  $it++;
+  echo "<br/>"."<br/>";
+  echo "--- Relatório Final ---<br/>";
+  echo "<br/> Matriz Final Computada!";
+  for($i=0;$i<$nres+1;$i++)
+    {
+        echo"<br/>";
+        for($p=0;$p<$nvd+$nres+2;$p++)
+        {
+         if(is_float($tableau[$i][$p])==true)
+           $print = number_format($tableau[$i][$p],1,',','.');
+         else
+           $print = $tableau[$i][$p];
+         print str_pad("$print", 10,".", STR_PAD_RIGHT) ;
+        }
+    }
+  
+  for($i=0;$i<$nres;$i++)
+    $vfolga[$i]=0;  
+  echo "<br/><br/>Variáveis Básicas:<br/>";
+  for($i=0;$i<$nres;$i++)
+  {
+    if($tableau[$i+1][0]<=$nvd)//Variável de decisão.
+	{
+	  echo "<br/>Variável de decisão {$variadec[$tableau[$i+1][0]-1][1]} = {$tableau[$i+1][$nvd+$nres+1]}";
+	}
+	else //Variável de folga.
+	{
+	  $n = ($tableau[$i+1][0]-$nres)+1;
+	  $vfolga[$n-1] = 1;
+	  echo "<br/>Variável de folga f$n referente a $n"."°"." restrição = {$tableau[$i+1][$nvd+$nres+1]}";
+	}
+  }
+  echo "<br/>Função objetivo $mx Z = {$tableau[0][$nvd+$nres+1]}";
+  
+  echo "<br/><br/>Variáveis Não Básicas:<br/>";
+  for($i=0;$i<$nres;$i++)
+    if($vfolga[$i]==0)
+	{
+	   $n = $i+1;
+	   echo "<br/>Variável de folga f$n referente a $n"."°"." restrição = 0";
+	}
+  
 ?>
